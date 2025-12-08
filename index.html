@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FriernBarnet Caning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        const GOOGLE_CLIENT_ID = '720001806300-9jnd8f1881nscc8enq512mpulurh1lb9.apps.googleusercontent.com';
+        const SPREADSHEET_ID = '1DMg4__qauXxvbnst7H3OekKlsgkDF0RocpbuYJNtX5I';
+    </script>
+    <style>
+        :root {
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --accent-primary: #0ea5e9;
+            --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --epavance: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        #top-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--bg-white);
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            pointer-events: auto;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 0 12px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .stat-value.danger {
+            color: var(--danger);
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 50px;
+            height: 50px;
+        }
+
+        .timer-circle svg {
+            transform: rotate(-90deg);
+            width: 50px;
+            height: 50px;
+        }
+
+        .timer-circle .timer-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 4;
+        }
+
+        .timer-circle .timer-progress {
+            fill: none;
+            stroke: url(#timerGradient);
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        .timer-circle .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        #stop-btn {
+            background: var(--danger);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 100;
+            pointer-events: auto;
+            overflow-y: auto;
+            padding: 30px 20px;
+        }
+
+        .menu-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-image {
+            width: 80px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin: 10px 0 5px;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        p.slogan {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .menu-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .menu-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 20px 25px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .time-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-btn {
+            flex: 1;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .time-btn.active {
+            border-color: var(--accent-primary);
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .avatar-option {
+            aspect-ratio: 1;
+            background: var(--bg-light);
+            border: 3px solid var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            gap: 5px;
+        }
+
+        .avatar-option.selected {
+            border-color: var(--accent-primary);
+        }
+
+        .avatar-preview {
+            width: 40px;
+            height: 40px;
+        }
+
+        .avatar-name {
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .molecule-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .molecule-card {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 14px;
+            cursor: pointer;
+            position: relative;
+            text-align: center;
+        }
+
+        .molecule-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .molecule-card.ffa {
+            --card-color: #22c55e;
+        }
+
+        .molecule-card.tg {
+            --card-color: #0ea5e9;
+        }
+
+        .molecule-card.ee {
+            --card-color: #ec4899;
+        }
+
+        .card-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: var(--card-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin: 0 auto 10px;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .card-subtitle {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: var(--card-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .stat-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .stat-bar-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            width: 40px;
+        }
+
+        .stat-bar-track {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: var(--card-color);
+            border-radius: 2px;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .cta-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .cta-text strong {
+            color: var(--epavance);
+        }
+
+        .action-btn {
+            padding: 14px 32px;
+            margin: 6px;
+            border-radius: 14px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        .btn-epavance {
+            background: linear-gradient(135deg, var(--epavance), #06b6d4);
+            color: white;
+            font-weight: 700;
+        }
+
+        .btn-google {
+            background: var(--bg-white);
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-google svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-light);
+            padding: 10px 16px;
+            border-radius: 50px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-primary);
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .sign-out-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: var(--success);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-save:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .save-status {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .save-status.success {
+            color: var(--success);
+        }
+
+        .save-status.error {
+            color: var(--danger);
+        }
+
+        .save-status.loading {
+            color: var(--accent-primary);
+        }
+
+        .leaderboard {
+            width: 100%;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .leaderboard-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 12px;
+        }
+
+        .leaderboard-rank.gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .leaderboard-rank.silver {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+        }
+
+        .leaderboard-rank.bronze {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .leaderboard-score {
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-size: 14px;
+        }
+
+        .leaderboard-empty {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        .player-spotlight {
+            font-size: 22px;
+            font-weight: 800;
+            margin: 10px 0;
+            padding: 8px 20px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2s linear infinite;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #message-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            font-weight: 800;
+            opacity: 0;
+            transition: all 0.4s;
+            pointer-events: none;
+            text-align: center;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .modal-box {
+            background: var(--bg-white);
+            padding: 35px;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 20px 50px var(--shadow);
+            max-width: 400px;
+        }
+
+        .modal-box h2 {
+            font-size: 24px;
+            margin: 0 0 10px;
+            color: var(--accent-primary);
+        }
+
+        .score-reveal {
+            font-size: 60px;
+            font-weight: 800;
+            color: var(--accent-primary);
+        }
+
+        .grade-badge {
+            display: inline-block;
+            font-size: 28px;
+            font-weight: 800;
+            padding: 8px 24px;
+            border-radius: 12px;
+            margin: 10px 0;
+        }
+
+        .grade-s {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        .grade-a {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .grade-b {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+        }
+
+        .grade-c {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .grade-d {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .game-hint {
+            margin-top: auto;
+            background: var(--bg-white);
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+            pointer-events: auto;
+        }
+
+        .game-hint strong {
+            color: var(--text-dark);
+        }
+
+        .game-hint .danger {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .powerup-indicator {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: var(--bg-white);
+            padding: 12px 18px;
+            border-radius: 15px;
+            border: 2px solid var(--epavance);
+            font-size: 13px;
+            color: var(--epavance);
+            font-weight: 600;
+            display: none;
+            z-index: 50;
+        }
+
+        #auth-section {
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            #top-bar {
+                padding: 6px 10px;
+                gap: 4px;
+                max-width: 98vw;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .stat-box {
+                padding: 0 2px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .stat-label {
+                display: none;
+            }
+
+            .stat-value {
+                font-size: 14px;
+            }
+
+            #current-molecule {
+                display: none;
+            }
+
+            .timer-circle {
+                width: 36px;
+                height: 36px;
+            }
+
+            .timer-circle svg {
+                width: 36px;
+                height: 36px;
+            }
+
+            .timer-circle .timer-text {
+                font-size: 12px;
+            }
+
+            #stop-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            #player-name-display {
+                max-width: 50px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9" />
+                <stop offset="100%" stop-color="#06b6d4" />
+            </linearGradient>
+        </defs>
+    </svg>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="powerup-indicator" class="powerup-indicator">⚡ POWER BOOST!</div>
+        <div id="ui-layer">
+            <div id="top-bar" style="display: none;">
+                <div class="stat-box">
+                    <div class="stat-label">Player</div>
+                    <div class="stat-value" id="player-name-display" style="font-size: 12px;">Guest</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Failed</div>
+                    <div class="stat-value danger" id="failed">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="timer-circle"><svg viewBox="0 0 50 50">
+                            <circle class="timer-bg" cx="25" cy="25" r="20" />
+                            <circle class="timer-progress" id="timer-progress" cx="25" cy="25" r="20"
+                                stroke-dasharray="125.6" stroke-dashoffset="0" />
+                        </svg>
+                        <div class="timer-text" id="timer">20</div>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Headmaster</div>
+                    <div class="stat-value" id="current-molecule" style="font-size: 12px;">None</div>
+                </div>
+                <button id="stop-btn" onclick="pauseGame()">⏸</button>
+            </div>
+            <div class="game-hint" id="game-hint" style="display: none;"><strong>Goal:</strong> Catch <span
+                    class="danger">STUDENTS</span>! <strong style="color:#22c55e">Faster = More Points!</strong>
+            </div>
+        </div>
+        <div id="message-area">CANED!</div>
+
+        <div id="menu-overlay" class="overlay">
+            <div class="menu-header"><img src="headmaster.png" alt="Headmaster" class="logo-image">
+                <h1>FriernBarnet Caning</h1>
+                <p class="slogan">Corporal punishment at Friern Barnet Grammar</p>
+            </div>
+            <div class="menu-sections">
+                <div class="menu-section">
+                    <div class="section-title">Enter Your Name</div><input type="text" id="player-name-input"
+                        class="input-field" placeholder="Enter your player name..." maxlength="20">
+                </div>
+                <div class="menu-section">
+                    <div class="section-title">Choose Headmaster Style</div>
+                    <div class="avatar-grid">
+                        <div class="avatar-option selected" data-avatar="classic" onclick="selectAvatar('classic')">
+                            <canvas class="avatar-preview" id="avatar-classic"></canvas><span
+                                class="avatar-name">Classic</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="neon" onclick="selectAvatar('neon')"><canvas
+                                class="avatar-preview" id="avatar-neon"></canvas><span class="avatar-name">Neon</span>
+                        </div>
+                        <div class="avatar-option" data-avatar="golden" onclick="selectAvatar('golden')"><canvas
+                                class="avatar-preview" id="avatar-golden"></canvas><span
+                                class="avatar-name">Golden</span></div>
+                        <div class="avatar-option" data-avatar="emerald" onclick="selectAvatar('emerald')"><canvas
+                                class="avatar-preview" id="avatar-emerald"></canvas><span
+                                class="avatar-name">Emerald</span></div>
+                        <div class="avatar-option" data-avatar="plasma" onclick="selectAvatar('plasma')"><canvas
+                                class="avatar-preview" id="avatar-plasma"></canvas><span
+                                class="avatar-name">Plasma</span></div>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title">Choose Game Duration</div>
+                    <div class="time-selector"><button class="time-btn active" data-time="20"
+                            onclick="selectTime(20)">20
+                            sec</button><button class="time-btn" data-time="30" onclick="selectTime(30)">30
+                            sec</button><button class="time-btn" data-time="60" onclick="selectTime(60)">60 sec</button>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title">Choose Student Year</div>
+                    <div class="molecule-cards">
+                        <div class="molecule-card ffa" onclick="startGame('ffa')">
+                            <div class="card-badge">Easy</div>
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">Year 7</div>
+                            <div class="card-subtitle">Slow • Easy to Catch</div>
+                            <div class="stat-bar"><span class="stat-bar-label">Speed</span>
+                                <div class="stat-bar-track">
+                                    <div class="stat-bar-fill" style="width:90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="molecule-card tg" onclick="startGame('tg')">
+                            <div class="card-badge">Medium</div>
+                            <div class="card-icon">🔬</div>
+                            <div class="card-title">Year 9</div>
+                            <div class="card-subtitle">Medium • Faster</div>
+                            <div class="stat-bar"><span class="stat-bar-label">Speed</span>
+                                <div class="stat-bar-track">
+                                    <div class="stat-bar-fill" style="width:60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="molecule-card ee" onclick="startGame('ee')">
+                            <div class="card-badge">Hard</div>
+                            <div class="card-icon">🧪</div>
+                            <div class="card-title">Sixth Form</div>
+                            <div class="card-subtitle">Fast • Hard to Catch</div>
+                            <div class="stat-bar"><span class="stat-bar-label">Speed</span>
+                                <div class="stat-bar-track">
+                                    <div class="stat-bar-fill" style="width:35%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title">Top 5 Leaderboard</div>
+                    <div id="leaderboard" class="leaderboard">
+                        <div class="leaderboard-empty">Loading scores...</div>
+                    </div>
+                </div>
+                <div class="menu-section">
+                    <div class="section-title">Save Your Scores</div>
+                    <div id="auth-section">
+                        <div id="signed-out-view"><button class="btn-google" onclick="handleGoogleSignIn()"><svg
+                                    viewBox="0 0 24 24">
+                                    <path fill="#4285F4"
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                    <path fill="#34A853"
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                    <path fill="#FBBC05"
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                    <path fill="#EA4335"
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                </svg>Sign in with Google</button></div>
+                        <div id="signed-in-view" style="display: none;">
+                            <div class="user-profile"><img id="user-avatar" class="user-avatar" src="" alt=""><span
+                                    id="user-name" class="user-name">Player</span><button class="sign-out-btn"
+                                    onclick="handleSignOut()">Sign Out</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cta-section">
+                    <p class="cta-text"><strong>Ready for real absorption?</strong> Take your skills to real life!</p>
+                    <button class="action-btn btn-epavance" onclick="window.open('https://epavance.co.uk','_blank')">🛒
+                        Buy EPAVANCE</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pause-overlay" class="overlay" style="display: none;">
+            <div class="modal-box">
+                <h2>Game Paused</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Take a breather!</p><button
+                    class="action-btn btn-primary" onclick="resumeGame()">▶ Resume</button><button
+                    class="action-btn btn-secondary" onclick="quitToMenu()">✕ Quit</button>
+                <div class="cta-section" style="margin-top:25px;">
+                    <p class="cta-text"><strong>Love the game?</strong> Try real EPA!</p><button
+                        class="action-btn btn-epavance" onclick="window.open('https://epavance.co.uk','_blank')">🛒 Buy
+                        EPAVANCE</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-over-overlay" class="overlay" style="display: none;">
+            <div class="modal-box">
+                <h2>Simulation Complete</h2>
+                <div id="player-spotlight" class="player-spotlight">PLAYER</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Final Score</div>
+                <div id="final-score" class="score-reveal">0</div>
+                <div id="grade-badge" class="grade-badge grade-b">B</div>
+                <div id="final-failed" style="font-size: 13px; color: var(--danger); margin-bottom: 15px;">Escaped: 0
+                </div><button id="save-score-btn" class="action-btn btn-save" onclick="saveScoreToSheet()" disabled>💾
+                    Save Score</button>
+                <div id="save-status" class="save-status"></div>
+                <div style="margin-top: 15px;"><button class="action-btn btn-primary" onclick="startGame(difficulty)">↻
+                        Play Again</button><button class="action-btn btn-secondary" onclick="quitToMenu()">Menu</button>
+                </div>
+                <div class="cta-section" style="margin-top:20px;">
+                    <p class="cta-text"><strong>Great skills!</strong> Experience real EPA!</p><button
+                        class="action-btn btn-epavance" onclick="window.open('https://epavance.co.uk','_blank')">🛒 Buy
+                        EPAVANCE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score'), timerEl = document.getElementById('timer'), timerProgress = document.getElementById('timer-progress');
+        const moleculeNameEl = document.getElementById('current-molecule'), menuOverlay = document.getElementById('menu-overlay');
+        const pauseOverlay = document.getElementById('pause-overlay'), gameOverOverlay = document.getElementById('game-over-overlay');
+        const topBar = document.getElementById('top-bar'), gameHint = document.getElementById('game-hint');
+        const finalScoreEl = document.getElementById('final-score'), finalFailedEl = document.getElementById('final-failed');
+        const gradeBadge = document.getElementById('grade-badge'), messageArea = document.getElementById('message-area');
+        const saveScoreBtn = document.getElementById('save-score-btn'), saveStatus = document.getElementById('save-status');
+        const failedEl = document.getElementById('failed'), playerNameDisplay = document.getElementById('player-name-display');
+        const playerNameInput = document.getElementById('player-name-input'), powerupIndicator = document.getElementById('powerup-indicator');
+        const playerSpotlight = document.getElementById('player-spotlight'), leaderboardEl = document.getElementById('leaderboard');
+
+        let animationId, lastTime = 0, score = 0, failed = 0, timeLeft = 20, maxTime = 20, selectedTime = 20;
+        let gameActive = false, isPaused = false, lastTimerUpdate = 0, lastStemCellSpawn = 0;
+        let currentUser = null, tokenClient = null, gapiInited = false, gisInited = false, accessToken = null;
+        let powerupActive = false, powerupEndTime = 0, baseMoleculeSize = 60, stemCell = null, selectedAvatar = 'classic';
+
+        const headmasterImage = new Image(); headmasterImage.src = 'headmaster.png';
+        const studentImage = new Image(); studentImage.src = 'student.png';
+
+        const AVATARS = { classic: { primary: '#0ea5e9', secondary: '#06b6d4', glow: '#0ea5e9' }, neon: { primary: '#f472b6', secondary: '#e879f9', glow: '#f0abfc' }, golden: { primary: '#fbbf24', secondary: '#f59e0b', glow: '#fcd34d' }, emerald: { primary: '#10b981', secondary: '#34d399', glow: '#6ee7b7' }, plasma: { primary: '#8b5cf6', secondary: '#a78bfa', glow: '#c4b5fd' } };
+
+        let difficulty = 'tg', molecule = { x: 0, y: 0, vx: 0, vy: 0, radius: 30, color: '#0ea5e9', state: 'active', opacity: 1.0, insideCell: null, size: 60 };
+        let cells = [], particles = [], mouse = { x: 0, y: 0 };
+
+        const CONFIG = { ffa: { name: "FFA", drag: 0.98, thrust: 1.5, vibration: 0.5, cellSpeed: 0.8, color: '#22c55e', scoreMult: 1 }, tg: { name: "TG", drag: 0.94, thrust: 0.8, vibration: 2.0, cellSpeed: 1.0, color: '#0ea5e9', scoreMult: 1.5 }, ee: { name: "EE", drag: 0.88, thrust: 0.4, vibration: 5.0, cellSpeed: 1.2, color: '#ec4899', scoreMult: 2.5 } };
+        let currentConfig = CONFIG.tg;
+
+        const CELL_SIZES = [{ radius: 44, coreRadius: 8, points: 30 }, { radius: 63, coreRadius: 12, points: 20 }, { radius: 88, coreRadius: 16, points: 15 }, { radius: 113, coreRadius: 20, points: 10 }];
+
+        function selectAvatar(avatar) { selectedAvatar = avatar; document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected')); document.querySelector(`.avatar-option[data-avatar="${avatar}"]`).classList.add('selected'); molecule.color = AVATARS[avatar].primary; }
+
+        function drawAvatarPreviews() { Object.keys(AVATARS).forEach(key => { const c = document.getElementById(`avatar-${key}`); if (!c) return; c.width = 50; c.height = 50; const x = c.getContext('2d'), s = AVATARS[key]; x.shadowBlur = 15; x.shadowColor = s.glow; x.beginPath(); x.arc(25, 25, 20, 0, Math.PI * 2); x.strokeStyle = s.primary; x.lineWidth = 3; x.stroke(); const g = x.createRadialGradient(25, 25, 0, 25, 25, 15); g.addColorStop(0, s.secondary); g.addColorStop(1, s.primary); x.beginPath(); x.arc(25, 25, 12, 0, Math.PI * 2); x.fillStyle = g; x.fill(); }); }
+
+        function selectTime(t) { selectedTime = t; document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active')); document.querySelector(`.time-btn[data-time="${t}"]`).classList.add('active'); }
+
+        function gapiLoaded() { gapi.load('client', async () => { await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] }); gapiInited = true; loadLeaderboard(); }); }
+        function gisLoaded() { tokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: 'https://www.googleapis.com/auth/spreadsheets', callback: '' }); gisInited = true; }
+
+        function handleGoogleSignIn() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error) { console.error(resp); return; }
+                accessToken = resp.access_token;
+                try {
+                    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${accessToken}` } });
+                    const userInfo = await response.json();
+                    currentUser = { name: userInfo.name, email: userInfo.email, picture: userInfo.picture };
+                    updateAuthUI();
+                } catch (e) { console.error(e); }
+            };
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        }
+
+        function handleSignOut() { if (accessToken) { google.accounts.oauth2.revoke(accessToken); } accessToken = null; currentUser = null; updateAuthUI(); }
+
+        function updateAuthUI() {
+            const out = document.getElementById('signed-out-view'), inn = document.getElementById('signed-in-view');
+            if (currentUser) { out.style.display = 'none'; inn.style.display = 'block'; document.getElementById('user-avatar').src = currentUser.picture || ''; document.getElementById('user-name').textContent = currentUser.name || 'Player'; playerNameInput.value = currentUser.name.split(' ')[0]; saveScoreBtn.disabled = false; }
+            else { out.style.display = 'block'; inn.style.display = 'none'; saveScoreBtn.disabled = true; }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                if (!gapiInited || !currentUser) throw new Error('Not signed in');
+                const response = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Sheet1!A:C' });
+                const rows = response.result.values || [];
+                if (rows.length <= 1) throw new Error('No global scores');
+                const scores = rows.slice(1).map(r => ({ name: r[0], score: parseInt(r[2]) || 0 })).sort((a, b) => b.score - a.score).slice(0, 5);
+                leaderboardEl.innerHTML = scores.map((s, i) => `<div class="leaderboard-item"><div class="leaderboard-rank ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}">${i + 1}</div><div class="leaderboard-name">${s.name}</div><div class="leaderboard-score">${s.score}</div></div>`).join('');
+            } catch (e) {
+                const localScores = getLocalLeaderboard();
+                if (localScores.length === 0) {
+                    leaderboardEl.innerHTML = '<div class="leaderboard-empty">No scores yet. Play to set a record!</div>';
+                } else {
+                    leaderboardEl.innerHTML = localScores.map((s, i) => `<div class="leaderboard-item"><div class="leaderboard-rank ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}">${i + 1}</div><div class="leaderboard-name">${s.name}</div><div class="leaderboard-score">${s.score}</div></div>`).join('');
+                }
+            }
+        }
+
+        function saveLocalScore(name, score) {
+            const scores = JSON.parse(localStorage.getItem('epa_battleship_scores') || '[]');
+            scores.push({ name, score, date: new Date().toISOString() });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('epa_battleship_scores', JSON.stringify(scores.slice(0, 50)));
+            loadLeaderboard();
+        }
+
+        function getLocalLeaderboard() {
+            return JSON.parse(localStorage.getItem('epa_battleship_scores') || '[]').slice(0, 5);
+        }
+
+        async function saveScoreToSheet() {
+            if (!currentUser || !accessToken) { saveStatus.textContent = 'Sign in first'; saveStatus.className = 'save-status error'; return; }
+            saveStatus.textContent = 'Saving...'; saveStatus.className = 'save-status loading'; saveScoreBtn.disabled = true;
+            try {
+                const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Sheet1!A:F:append?valueInputOption=USER_ENTERED`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ values: [[currentUser.name, currentUser.email, score, failed, currentConfig.name, new Date().toLocaleString()]] })
+                });
+                const result = await response.json();
+                if (result.error) {
+                    throw result.error;
+                }
+                saveStatus.textContent = '✓ Saved!'; saveStatus.className = 'save-status success';
+            } catch (e) {
+                console.error(e);
+                let msg = '✗ Failed';
+                if (e.code === 403) msg = '✗ Permission denied (Share sheet)';
+                if (e.code === 404) msg = '✗ Sheet not found';
+                saveStatus.textContent = msg;
+                saveStatus.className = 'save-status error';
+                saveScoreBtn.disabled = false;
+            }
+        }
+
+        window.addEventListener('load', () => { drawAvatarPreviews(); const g1 = setInterval(() => { if (typeof gapi !== 'undefined') { clearInterval(g1); gapiLoaded(); } }, 100); const g2 = setInterval(() => { if (typeof google !== 'undefined' && google.accounts) { clearInterval(g2); gisLoaded(); } }, 100); });
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
+        canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        canvas.addEventListener('touchmove', e => { e.preventDefault(); const touch = e.touches[0]; mouse.x = touch.clientX; mouse.y = touch.clientY; }, { passive: false });
+        canvas.addEventListener('mousedown', () => { if (!gameActive || isPaused || molecule.state !== 'active') return; boostMolecule(); });
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); if (!gameActive || isPaused || molecule.state !== 'active') return; const touch = e.touches[0]; mouse.x = touch.clientX; mouse.y = touch.clientY; boostMolecule(); }, { passive: false });
+
+        function boostMolecule() { const dx = mouse.x - molecule.x, dy = mouse.y - molecule.y, dist = Math.sqrt(dx * dx + dy * dy); const thrust = powerupActive ? currentConfig.thrust * 2 : currentConfig.thrust; if (dist > 0) { molecule.vx += (dx / dist) * thrust; molecule.vy += (dy / dist) * thrust; } const style = AVATARS[selectedAvatar]; for (let i = 0; i < 5; i++) particles.push({ x: molecule.x, y: molecule.y, vx: -molecule.vx * 0.5 + (Math.random() - 0.5), vy: -molecule.vy * 0.5 + (Math.random() - 0.5), life: 0.6, color: powerupActive ? '#10b981' : style.primary, size: Math.random() * 3 }); }
+
+        class RedBloodCell { constructor(id) { this.id = id; this.reset(); } reset() { const s = CELL_SIZES[Math.floor(Math.random() * CELL_SIZES.length)]; this.radius = s.radius; this.coreRadius = s.coreRadius; this.points = s.points; if (Math.random() < 0.5) { this.x = Math.random() < 0.5 ? -150 : canvas.width + 150; this.y = Math.random() * canvas.height; } else { this.x = Math.random() * canvas.width; this.y = Math.random() < 0.5 ? -150 : canvas.height + 150; } const angle = Math.atan2(canvas.height / 2 - this.y, canvas.width / 2 - this.x) + (Math.random() - 0.5); this.vx = Math.cos(angle) * currentConfig.cellSpeed; this.vy = Math.sin(angle) * currentConfig.cellSpeed; this.rotation = Math.random() * Math.PI * 2; this.rotationSpeed = (Math.random() - 0.5) * 0.01; } update() { this.x += this.vx; this.y += this.vy; this.rotation += this.rotationSpeed; if (this.x < -250 || this.x > canvas.width + 250 || this.y < -250 || this.y > canvas.height + 250) { if (molecule.insideCell === this.id) molecule.insideCell = null; this.reset(); } } draw(c) { c.save(); c.translate(this.x, this.y); c.rotate(this.rotation); if (studentImage.complete) { c.drawImage(studentImage, -this.radius, -this.radius, this.radius * 2, this.radius * 2); } else { c.beginPath(); c.fillStyle = 'red'; c.arc(0, 0, this.radius, 0, Math.PI * 2); c.fill(); } c.shadowBlur = 0; c.fillStyle = '#fff'; c.font = `bold ${16}px Inter`; c.textAlign = 'center'; c.fillText(`Running!`, 0, this.radius + 18); c.restore(); } }
+
+        class StemCell { constructor() { this.reset(); } reset() { this.radius = 45; this.coreRadius = 22; this.x = Math.random() < 0.5 ? -100 : canvas.width + 100; this.y = Math.random() * canvas.height; const angle = Math.atan2(canvas.height / 2 - this.y, canvas.width / 2 - this.x); this.vx = Math.cos(angle) * 1.5; this.vy = Math.sin(angle) * 1.5; this.pulsePhase = 0; this.active = true; } update() { this.x += this.vx; this.y += this.vy; this.pulsePhase += 0.1; if (this.x < -150 || this.x > canvas.width + 150 || this.y < -150 || this.y > canvas.height + 150) this.active = false; } draw(c) { if (!this.active) return; const p = Math.sin(this.pulsePhase) * 0.2 + 1; c.save(); c.translate(this.x, this.y); c.beginPath(); c.fillStyle = 'rgba(16, 185, 129, 0.15)'; c.arc(0, 0, this.radius * 1.5 * p, 0, Math.PI * 2); c.fill(); c.beginPath(); c.strokeStyle = 'rgba(16, 185, 129, 0.8)'; c.lineWidth = 3; c.arc(0, 0, this.radius * p, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.fillStyle = '#10b981'; c.shadowBlur = 25; c.shadowColor = '#34d399'; c.arc(0, 0, this.coreRadius * p, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0; c.font = 'bold 20px Inter'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('⚡', 0, 0); c.restore(); } }
+
+        function updateTimerDisplay() { timerProgress.style.strokeDashoffset = 125.6 * (1 - timeLeft / maxTime); timerEl.textContent = timeLeft; }
+        function getGrade(s, f) { const r = f > 0 ? s / (s + f * 10) : 1; if (s >= 150 && r >= 0.9) return 'S'; if (s >= 100 && r >= 0.8) return 'A'; if (s >= 60 && r >= 0.6) return 'B'; if (s >= 30 && r >= 0.4) return 'C'; return 'D'; }
+        function activatePowerup() { powerupActive = true; powerupEndTime = performance.now() + 5000; molecule.size = baseMoleculeSize * 2; powerupIndicator.style.display = 'block'; showMessage("⚡ POWER BOOST!", '#10b981'); }
+
+        function startGame(diff) { difficulty = diff; currentConfig = CONFIG[diff]; const playerName = playerNameInput.value.trim() || 'Guest'; playerNameDisplay.textContent = playerName; moleculeNameEl.textContent = currentConfig.name; molecule.color = AVATARS[selectedAvatar].primary; molecule.size = baseMoleculeSize; score = 0; failed = 0; timeLeft = selectedTime; maxTime = selectedTime; scoreEl.textContent = score; failedEl.textContent = failed; updateTimerDisplay(); powerupActive = false; powerupIndicator.style.display = 'none'; stemCell = null; lastStemCellSpawn = 0; resetMolecule(); cells = []; for (let i = 0; i < 6; i++) cells.push(new RedBloodCell(i)); gameActive = true; isPaused = false; menuOverlay.style.display = 'none'; gameOverOverlay.style.display = 'none'; pauseOverlay.style.display = 'none'; topBar.style.display = 'flex'; gameHint.style.display = 'block'; if (animationId) cancelAnimationFrame(animationId); lastTime = performance.now(); lastTimerUpdate = performance.now(); animationId = requestAnimationFrame(loop); }
+
+        function pauseGame() { isPaused = true; pauseOverlay.style.display = 'flex'; }
+        function resumeGame() { isPaused = false; pauseOverlay.style.display = 'none'; lastTime = performance.now(); lastTimerUpdate = performance.now(); animationId = requestAnimationFrame(loop); }
+        function quitToMenu() { gameActive = false; isPaused = false; pauseOverlay.style.display = 'none'; gameOverOverlay.style.display = 'none'; topBar.style.display = 'none'; gameHint.style.display = 'none'; powerupIndicator.style.display = 'none'; menuOverlay.style.display = 'flex'; loadLeaderboard(); }
+        function resetMolecule() { molecule.x = canvas.width / 2; molecule.y = canvas.height / 2; molecule.vx = 0; molecule.vy = 0; molecule.state = 'active'; molecule.opacity = 1.0; molecule.insideCell = null; }
+        function showMessage(text, color) { messageArea.textContent = text; messageArea.style.color = color || '#333'; messageArea.style.textShadow = `0 4px 20px ${color || 'rgba(0,0,0,0.2)'}`; messageArea.style.opacity = 1; setTimeout(() => { messageArea.style.opacity = 0; }, 800); }
+
+        function endGame() {
+            gameActive = false;
+            const playerName = playerNameInput.value.trim() || 'Guest';
+            playerSpotlight.textContent = playerName;
+            finalScoreEl.textContent = score;
+            finalFailedEl.textContent = `Failed: ${failed}`;
+            const grade = getGrade(score, failed);
+            gradeBadge.textContent = grade;
+            gradeBadge.className = `grade-badge grade-${grade.toLowerCase()}`;
+            gameOverOverlay.style.display = 'flex';
+            topBar.style.display = 'none';
+            gameHint.style.display = 'none';
+            powerupIndicator.style.display = 'none';
+            saveStatus.textContent = '';
+            saveStatus.className = 'save-status';
+
+            saveLocalScore(playerName, score); // Auto-save locally
+
+            if (currentUser && accessToken) saveScoreBtn.disabled = false;
+        }
+
+        function drawMolecule(c, x, y, opacity, vibration, size) { const style = AVATARS[selectedAvatar]; c.save(); const jx = (Math.random() - 0.5) * vibration, jy = (Math.random() - 0.5) * vibration; c.translate(x + jx, y + jy); const speed = Math.sqrt(molecule.vx * molecule.vx + molecule.vy * molecule.vy); if (speed > 0.1) c.rotate(Math.atan2(molecule.vy, molecule.vx)); c.shadowBlur = powerupActive ? 40 : 20 + speed * 5; c.shadowColor = powerupActive ? '#34d399' : style.glow; c.globalAlpha = opacity; if (headmasterImage.complete) { c.drawImage(headmasterImage, -size / 2, -size / 2, size, size); } else { c.beginPath(); c.arc(0, 0, size / 2 + 5, 0, Math.PI * 2); c.strokeStyle = style.primary; c.lineWidth = 3; c.stroke(); } c.shadowBlur = 0; c.restore(); }
+
+        function loop(timestamp) { if (!gameActive || isPaused) return; const dt = (timestamp - lastTime) / 16.66; lastTime = timestamp; if (timestamp - lastTimerUpdate > 1000) { timeLeft--; updateTimerDisplay(); lastTimerUpdate = timestamp; if (timeLeft <= 0) endGame(); } if (powerupActive && timestamp > powerupEndTime) { powerupActive = false; molecule.size = baseMoleculeSize; powerupIndicator.style.display = 'none'; } const gameTime = maxTime - timeLeft; if (gameTime > 0 && gameTime % 10 === 0 && gameTime !== lastStemCellSpawn && !stemCell) { stemCell = new StemCell(); lastStemCellSpawn = gameTime; } ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = 'rgba(14, 165, 233, 0.08)'; ctx.lineWidth = 1; const gridSize = 50, offset = (timestamp * 0.015) % gridSize; for (let x = offset; x < canvas.width; x += gridSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); } for (let y = offset; y < canvas.height; y += gridSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); } if (gameActive) { if (molecule.state === 'active') { molecule.vx *= currentConfig.drag; molecule.vy *= currentConfig.drag; molecule.x += molecule.vx * dt; molecule.y += molecule.vy * dt; if (molecule.x < 0 || molecule.x > canvas.width) { molecule.vx *= -0.8; molecule.x = Math.max(0, Math.min(canvas.width, molecule.x)); } if (molecule.y < 0 || molecule.y > canvas.height) { molecule.vy *= -0.8; molecule.y = Math.max(0, Math.min(canvas.height, molecule.y)); } } else if (molecule.state === 'dying') { molecule.opacity -= 0.05; if (molecule.opacity <= 0) resetMolecule(); } if (molecule.opacity > 0) drawMolecule(ctx, molecule.x, molecule.y, molecule.opacity, currentConfig.vibration, molecule.size); if (stemCell && stemCell.active) { stemCell.update(); stemCell.draw(ctx); const sdx = molecule.x - stemCell.x, sdy = molecule.y - stemCell.y, sdist = Math.sqrt(sdx * sdx + sdy * sdy); if (sdist < stemCell.coreRadius + molecule.radius && molecule.state === 'active') { activatePowerup(); stemCell.active = false; stemCell = null; for (let i = 0; i < 20; i++) particles.push({ x: molecule.x, y: molecule.y, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15, life: 1.5, color: '#10b981', size: Math.random() * 5 }); } } cells.forEach(cell => { cell.update(); cell.draw(ctx); if (molecule.state !== 'active') return; const dx = molecule.x - cell.x, dy = molecule.y - cell.y, dist = Math.sqrt(dx * dx + dy * dy); if (dist < cell.coreRadius + molecule.radius) { const points = Math.floor(cell.points * currentConfig.scoreMult); score += points; scoreEl.textContent = Math.floor(score); showMessage(`CANED! +${points}`, '#22c55e'); for (let i = 0; i < 15; i++) particles.push({ x: cell.x, y: cell.y, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, life: 1.2, color: '#22c55e', size: Math.random() * 4 }); cell.reset(); molecule.insideCell = null; return; } if (dist < cell.radius) { if (molecule.insideCell !== cell.id) molecule.insideCell = cell.id; molecule.vx *= 0.95; molecule.vy *= 0.95; } else { if (molecule.insideCell === cell.id) { molecule.state = 'dying'; molecule.insideCell = null; failed++; failedEl.textContent = failed; showMessage("ESCAPED!", '#ef4444'); for (let i = 0; i < 8; i++) particles.push({ x: molecule.x, y: molecule.y, vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5, life: 1.0, color: '#ef4444', size: 2 }); } } }); for (let i = particles.length - 1; i >= 0; i--) { let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.02; ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size || 2, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1.0; if (p.life <= 0) particles.splice(i, 1); } } animationId = requestAnimationFrame(loop); }
+    </script>
+</body>
+
+</html>
